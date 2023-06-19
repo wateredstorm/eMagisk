@@ -1,0 +1,5 @@
+{
+    "api_key": "your_key",
+    "device_name": "your_device",
+    "device_configuration_manager_url": "your_backend"
+}
