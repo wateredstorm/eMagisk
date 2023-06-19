@@ -16,6 +16,15 @@ If the above procedures fails 4 times in a row (16 minutes total) then the devic
 
 ---
 
+## GoCheats Config (Important)
+
+`
+{
+      "api_key": "your_api_key",
+      "device_name": "device_name",
+      "device_configuration_manager_url": "dcm_url"
+  }`
+
 ## Installation
 
 If you really want to install this version, you have to:
@@ -30,7 +39,9 @@ If you really want to install this version, you have to:
 Note: step 3 only works on Magisk versions 21.2 and forward. If you have an earlier Magisk version, install through Magisk Manager (scrcpy into the device) or update your Magisk.
 
 ## Changelog
+### 9.4.4 
 
+Made changes to work with GoCheats
 ### 9.4.2
 
 Removed clearing data from pogo and atlas on restart as it's not needed and can break things
