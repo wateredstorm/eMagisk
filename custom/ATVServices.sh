@@ -9,14 +9,11 @@ CONFIGFILE='/data/local/tmp/emagisk.config'
 # Check if this is a beta or production device
 
 check_beta() {    
-    if [ "$(pm list packages com.pokemod.atlas.beta)" = "package:com.pokemod.atlas.beta" ]; then
-        log "Found Atlas developer version!"
-        ATLASPKG=com.pokemod.atlas.beta
-    elif [ "$(pm list packages com.pokemod.atlas)" = "package:com.pokemod.atlas" ]; then
-        log "Found Atlas production version!"
-        ATLASPKG=com.pokemod.atlas
+    if [ "$(pm list packages com.gocheats.launcher)" = "package:com.gocheats.launcher" ]; then
+        log "Found GoCheats production version!"
+        GOCHEATSPKG=com.gocheats.launcher
     else
-        log "No Atlas installed. Abort!"
+        log "No GoCheats installed. Abort!"
         exit 1
     fi
 }
@@ -31,14 +28,13 @@ led_blue(){
     echo 1 > /sys/class/leds/led-sys/brightness
 }
 
-# Stops Atlas and Pogo and restarts Atlas MappingService
+# Stops GoCheats and Pogo and restarts GoCheats MappingService
 
 force_restart() {
-    am stopservice $ATLASPKG/com.pokemod.atlas.services.MappingService
     am force-stop $POGOPKG
-    am force-stop $ATLASPKG
+    am force-stop $GOCHEATSPKG
     sleep 5
-    am startservice $ATLASPKG/com.pokemod.atlas.services.MappingService
+    monkey -p $GOCHEATSPKG 1
     log "Services were restarted!"
 }
 
@@ -100,7 +96,7 @@ configfile_rdm() {
     fi
 }
 
-# Adjust the script depending on Atlas production or beta
+# Adjust the script depending on GoCheats production or beta
 
 check_beta
 
@@ -134,9 +130,9 @@ if ! magiskhide ls | grep -m1 $POGOPKG; then
     magiskhide add $POGOPKG
 fi
 
-# Give all atlas services root permissions
+# Give all GoCheats services root permissions
 
-for package in $ATLASPKG com.android.shell; do
+for package in $GOCHEATSPKG com.android.shell; do
     packageUID=$(dumpsys package "$package" | grep userId | head -n1 | cut -d= -f2)
     policy=$(sqlite3 /data/adb/magisk.db "select policy from policies where package_name='$package'")
     if [ "$policy" != 2 ]; then
@@ -150,11 +146,11 @@ for package in $ATLASPKG com.android.shell; do
     fi
 done
 
-# Set atlas mock location permission as ignore
+# Set GoCheats mock location permission as ignore
 
-if ! appops get $ATLASPKG android:mock_location | grep -qm1 'No operations'; then
-    log "Removing mock location permissions from $ATLASPKG"
-    appops set $ATLASPKG android:mock_location 2
+if ! appops get $GOCHEATSPKG android:mock_location | grep -qm1 'No operations'; then
+    log "Removing mock location permissions from $GOCHEATSPKG"
+    appops set $GOCHEATSPKG android:mock_location 2
 fi
 
 # Disable all location providers
@@ -185,7 +181,7 @@ fi
 
 # Health Service by Emi and Bubble with a little root touch
 
-if [ "$(pm list packages $ATLASPKG)" = "package:$ATLASPKG" ]; then
+if [ "$(pm list packages $GOCHEATSPKG)" = "package:$GOCHEATSPKG" ]; then
     (
         log "eMagisk v$(cat "$MODDIR/version_lock"). Starting health check service in 4 minutes..."
         counter=0
@@ -203,11 +199,11 @@ if [ "$(pm list packages $ATLASPKG)" = "package:$ATLASPKG" ]; then
             fi
 
             log "Started health check!"
-            atlasDeviceName=$(cat /data/local/tmp/atlas_config.json | awk -F\" '{print $12}')
+            gocheatsDeviceName=$(cat /data/local/tmp/config.json | awk 'FNR == 3  {print $2}'| awk -F"\"" '{print $2}')
 	        rdmDeviceInfo=$(curl -s -k -u $rdm_user:$rdm_password "$rdm_backendURL/api/get_data?show_devices=true&formatted=true"  | awk -F\[ '{print $2}' | awk -F\}\,\{\" '{print $'$rdmDeviceID'}')
             rdmDeviceName=$(curl -s -k -u $rdm_user:$rdm_password "$rdm_backendURL/api/get_data?show_devices=true&formatted=true" | awk -F\[ '{print $2}' | awk -F\}\,\{\" '{print $'$rdmDeviceID'}' | awk -Fuuid\"\:\" '{print $2}' | awk -F\" '{print $1}')
 	
-	        until [[ $rdmDeviceName = $atlasDeviceName ]]
+	        until [[ $rdmDeviceName = $gocheatsDeviceName ]]
 	        do
 		        $((rdmDeviceID++))
 		        rdmDeviceInfo=$(curl -s -k -u $rdm_user:$rdm_password "$rdm_backendURL/api/get_data?show_devices=true&formatted=true" | awk -F\[ '{print $2}' | awk -F\}\,\{\" '{print $'$rdmDeviceID'}')
@@ -232,7 +228,7 @@ if [ "$(pm list packages $ATLASPKG)" = "package:$ATLASPKG" ]; then
 	        	calcTimeDiff=$(($now - $rdmDeviceLastseen))
 	
 	        	if [[ $calcTimeDiff -gt 300 ]]; then
-		        	log "Last seen at RDM is greater than 5 minutes -> Atlas Service will be restarting..."
+		        	log "Last seen at RDM is greater than 5 minutes -> GoCheats Service will be restarting..."
 		        	force_restart
                 		led_red
                 		counter=$((counter+1))
@@ -251,5 +247,5 @@ if [ "$(pm list packages $ATLASPKG)" = "package:$ATLASPKG" ]; then
         done
     ) &
 else
-    log "Atlas isn't installed on this device! The daemon will stop."
+    log "GoCheats isn't installed on this device! The daemon will stop."
 fi
