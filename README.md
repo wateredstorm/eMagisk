@@ -23,7 +23,7 @@ If the above procedures fails 4 times in a row (16 minutes total) then the devic
       "api_key": "your_api_key",
       "device_name": "device_name",
       "device_configuration_manager_url": "dcm_url"
-  }```
+  }
 
 ## Installation
 
